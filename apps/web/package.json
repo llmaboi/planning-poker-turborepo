@@ -1,27 +1,29 @@
 {
   "name": "web",
-  "version": "0.0.0",
   "private": true,
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "next": "13.0.0",
+    "@types/axios": "^0.14.0",
+    "axios": "^1.1.3",
+    "react-minimal-pie-chart": "^8.3.0",
+    "react-query": "^3.39.2",
+    "react-router-dom": "^6.4.2",
+    "zod": "^3.19.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "ui": "*"
+    "planning-poker-types": "*"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0",
-    "eslint": "7.32.0",
-    "eslint-config-custom": "*",
-    "tsconfig": "*",
-    "@types/node": "^17.0.12",
-    "@types/react": "^18.0.22",
-    "@types/react-dom": "^18.0.7",
-    "typescript": "^4.5.3"
+    "@types/react": "^18.0.24",
+    "@types/react-dom": "^18.0.8",
+    "@vitejs/plugin-react": "^2.2.0",
+    "typescript": "^4.6.4",
+    "vite": "^3.2.3"
   }
 }
