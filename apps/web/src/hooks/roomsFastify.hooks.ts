@@ -2,15 +2,33 @@ import {
   createDisplay,
   createRoom,
   getDisplayByName,
+  getRoomById,
   getRoomByName,
   getRoomDisplays,
+  getRooms,
   updateDisplay,
 } from '../api/mysqlFastify';
 import { queryClient } from '../config/queryClient';
 import { useMutation, useQuery } from 'react-query';
+import {
+  Display,
+  DisplayRaw,
+  Room,
+  ZodDisplay,
+  ZodRoom,
+} from 'planning-poker-types';
+import { displayRawToDisplay } from '../api/helpers';
 
 function useGetRoomDisplays({ roomId }: { roomId: number }) {
-  return useQuery(['room', roomId], async () => getRoomDisplays(roomId));
+  return useQuery<Display[]>(['displays', roomId], async () => {
+    const displaysData = await getRoomDisplays(roomId);
+
+    const displays = displaysData.map((displayRaw) =>
+      displayRawToDisplay(displayRaw)
+    );
+
+    return displays;
+  });
 }
 
 interface UpdateDisplayProps {
@@ -35,7 +53,7 @@ function useUpdateDisplay({ roomId }: { roomId: number }) {
   );
 }
 
-function useCreateOrFindDisplayByName() {
+function useFindOrCreateDisplayByName() {
   return useMutation(
     async ({
       displayName,
@@ -47,10 +65,10 @@ function useCreateOrFindDisplayByName() {
       roomId: number;
       cardValue?: number;
       isHost?: boolean;
-    }) => {
+    }): Promise<Display> => {
       try {
-        const display = await getDisplayByName(displayName);
-
+        const displayRaw = await getDisplayByName(displayName);
+        const display = displayRawToDisplay(displayRaw);
         return display;
       } catch (error) {
         const createdDisplay = await createDisplay({
@@ -59,7 +77,8 @@ function useCreateOrFindDisplayByName() {
           isHost,
           cardValue,
         });
-        return createdDisplay;
+        const display = displayRawToDisplay(createdDisplay);
+        return display;
       }
     },
     {
@@ -82,17 +101,11 @@ function useCreateOrFindDisplayByName() {
 //   return useMutation(['room', roomName], (label: string) => setRoomLabel({ label, roomName }));
 // }
 
-function useCreateOrFindRoomByName() {
+function useCreateRoom() {
   return useMutation(
     async ({ roomName }: { roomName: string }) => {
-      try {
-        const room = await getRoomByName(roomName);
-
-        return room;
-      } catch (error) {
-        const createdRoom = await createRoom({ roomName });
-        return createdRoom;
-      }
+      const createdRoom = await createRoom({ roomName });
+      return createdRoom;
     },
     {
       onSuccess: (data) => {
@@ -102,10 +115,30 @@ function useCreateOrFindRoomByName() {
   );
 }
 
+function useGetRooms() {
+  return useQuery<Room[]>(['room'], async () => {
+    const roomsRaw = await getRooms();
+
+    const rooms = roomsRaw.map((room) => ZodRoom.parse(room));
+    return rooms;
+  });
+}
+
+function useGetRoomById({ roomId }: { roomId: number }) {
+  return useQuery<Room>(['room', roomId], async () => {
+    const roomRaw = await getRoomById(roomId);
+
+    const room = ZodRoom.parse(roomRaw);
+    return room;
+  });
+}
+
 export {
+  useCreateRoom,
+  useGetRooms,
+  useGetRoomById,
   useGetRoomDisplays,
   useUpdateDisplay,
-  useCreateOrFindRoomByName,
-  useCreateOrFindDisplayByName,
+  useFindOrCreateDisplayByName,
 };
 export type { UpdateDisplayProps };

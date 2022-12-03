@@ -14,7 +14,7 @@ import { displayRawToDisplay } from './helpers';
 async function getRoomDisplays(roomId: number) {
   const { axiosInstance } = connectAxios();
   const roomDisplays = await axiosInstance.get<ResponseData<DisplayRaw[]>>(
-    `/displays/room/${roomId}`
+    `/api/displays/room/${roomId}`
     // `${API_BASE}/displays/room/${roomId}`
   );
 
@@ -39,7 +39,7 @@ function websocketRoomDisplays(
   roomId: number,
   setDisplays: (data: Display[]) => void
 ) {
-  const { websocket } = connectWebsocket(`/displays/room/${roomId}/socket`);
+  const { websocket } = connectWebsocket(`/api/displays/room/${roomId}/socket`);
 
   websocket.onmessage = (event) => {
     const json = JSON.parse(event.data);
@@ -93,11 +93,21 @@ async function createRoom({
   return rawRoom;
 }
 
+async function getRooms() {
+  const { axiosInstance } = connectAxios();
+  const { data: roomsData } = await axiosInstance.get<ResponseData<Room[]>>(
+    '/api/rooms'
+  );
+
+  const rawRooms = roomsData.data.map((item) => ZodRoomRaw.parse(item));
+  return rawRooms;
+}
+
 async function getRoomById(roomId: number) {
   const { axiosInstance } = connectAxios();
   // const roomDisplays = await axiosInstance.get<ResponseData<Room>>(`${API_BASE}/rooms/${roomId}`);
   const roomDisplays = await axiosInstance.get<ResponseData<Room>>(
-    `/api/rooms/id/${roomId}`
+    `/api/rooms/${roomId}`
   );
 
   const rawRoom = ZodRoomRaw.parse(roomDisplays.data.data);
@@ -129,14 +139,17 @@ async function createDisplay({
   isHost?: boolean;
 }) {
   const { axiosInstance } = connectAxios();
+  const props = {
+    roomId,
+    name,
+    cardValue,
+    isHost,
+  };
+
+  console.log('props: ', props);
   const displayDisplays = await axiosInstance.post<ResponseData<Display>>(
     '/api/displays',
-    {
-      roomId,
-      name,
-      cardValue,
-      isHost,
-    }
+    props
   );
 
   const rawDisplay = ZodDisplayRaw.parse(displayDisplays.data.data);
@@ -166,6 +179,7 @@ export {
   //   getDisplaysFromQuerySnapshot,
   getRoomDisplays,
   //   getRoomDisplaysSnapshotQuery,
+  getRooms,
   getRoomById,
   getRoomByName,
   //   getRoomSnapshotQuery,

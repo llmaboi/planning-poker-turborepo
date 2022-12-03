@@ -23,7 +23,7 @@ export { ZodDisplay, ZodDisplayRaw };
 // 	`name` varchar(255) NOT NULL,
 // 	`utc_updated` datetime DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
 // 	`room_id` BIGINT NOT NULL,
-//  `card_value` int NOT NULL,
+//  `card_value` int NOT NULL DEFAULT 0,
 //  `is_host` tinyint(1) DEFAULT '0',
 // 	PRIMARY KEY (`id`),
 // 	UNIQUE KEY `id_UNIQUE` (`id`)

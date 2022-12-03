@@ -12,7 +12,7 @@ CREATE TABLE `Displays` (
 	`name` varchar(255) NOT NULL,
 	`utc_updated` datetime DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
 	`room_id` BIGINT NOT NULL,
-	`card_value` INT NOT NULL,
+	`card_value` INT NOT NULL DEFAULT 0,
 	`is_host` BOOLEAN DEFAULT 0,
 	PRIMARY KEY (`id`),
 	UNIQUE KEY `id_UNIQUE` (`id`)

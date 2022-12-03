@@ -1,9 +1,30 @@
 import { useState, ChangeEvent, FormEvent } from 'react';
 import {
-  useCreateOrFindDisplayByName,
-  useUpdateDisplay,
+  useFindOrCreateDisplayByName,
+  useGetRoomById,
+  useGetRoomDisplays,
 } from '../hooks/roomsFastify.hooks';
 import { useNavigate, useParams } from 'react-router-dom';
+
+function DisplayList({ roomId }: { roomId: number }) {
+  const { data: displays, isLoading, isError } = useGetRoomDisplays({ roomId });
+
+  if (isLoading) {
+    return <p>Loading rooms...</p>;
+  } else if (isError || (!isLoading && !displays)) {
+    return <p>Something went wrong getting the rooms...</p>;
+  }
+
+  return (
+    <>
+      <ul>
+        {displays.map((display) => {
+          return <li key={display.id}>{display.name}</li>;
+        })}
+      </ul>
+    </>
+  );
+}
 
 // TODO: add to route with `roomId` as route param
 function DisplayLogin() {
@@ -13,7 +34,8 @@ function DisplayLogin() {
   const params = useParams();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const roomId = parseInt(params.roomId!);
-  const createOrFindDisplayMutation = useCreateOrFindDisplayByName();
+  const findOrCreateDisplayMutation = useFindOrCreateDisplayByName();
+  const { data: room, isLoading, isError } = useGetRoomById({ roomId });
 
   const navigate = useNavigate();
 
@@ -31,14 +53,14 @@ function DisplayLogin() {
     setIsHost(!isHost);
   }
 
-  function handleCreateOrFindDisplay(event: FormEvent<HTMLFormElement>) {
+  function handleFindOrCreateDisplay(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!displayNameExists) {
       setDisplayNameError(true);
       return;
     }
 
-    createOrFindDisplayMutation.mutate(
+    findOrCreateDisplayMutation.mutate(
       { roomId, cardValue: 0, isHost, displayName },
       {
         onSuccess: () => {
@@ -58,7 +80,7 @@ function DisplayLogin() {
   return (
     <>
       <form
-        onSubmit={handleCreateOrFindDisplay}
+        onSubmit={handleFindOrCreateDisplay}
         style={{ display: 'flex', flexDirection: 'column' }}
       >
         <label>
@@ -80,6 +102,16 @@ function DisplayLogin() {
         <button disabled={!displayNameExists} type='submit'>
           Join room
         </button>
+
+        {/* TODO: make into separate component? */}
+        {isLoading || isError || (!isLoading && !room) ? (
+          <p>Loading room displays</p>
+        ) : (
+          <>
+            <h4>Current Display Names in {room.name}:</h4>
+            <DisplayList roomId={roomId} />
+          </>
+        )}
       </form>
     </>
   );
