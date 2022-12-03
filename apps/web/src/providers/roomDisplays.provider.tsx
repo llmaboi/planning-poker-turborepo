@@ -44,10 +44,7 @@ function RoomDisplaysProvider({ children }: { children: ReactNode }) {
       // Set displays once per room id...
       data && setDisplays(data);
       const parsedRoomId = parseInt(roomId);
-      const { websocket } = websocketRoomDisplays(parsedRoomId, (displays) => {
-        console.log('updated: ', displays);
-        setDisplays(displays);
-      });
+      const { websocket } = websocketRoomDisplays(parsedRoomId, setDisplays);
       // eslint-disable-next-line react-hooks/exhaustive-deps
       unSubDisplays = websocket;
     }
