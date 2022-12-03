@@ -51,7 +51,6 @@ function websocketRoomDisplays(
     const { data }: { data: DisplayRaw[] } = json;
 
     const parsedDisplays = data.map((item) => ZodDisplayRaw.parse(item));
-    console.log(parsedDisplays);
     // TODO: update provider...
     const transformedDisplays = parsedDisplays.map(displayRawToDisplay);
     setDisplays(transformedDisplays);
@@ -139,24 +138,27 @@ async function createDisplay({
   isHost?: boolean;
 }) {
   const { axiosInstance } = connectAxios();
-  const props = {
-    roomId,
-    name,
-    cardValue,
-    isHost,
-  };
-
-  console.log('props: ', props);
   const displayDisplays = await axiosInstance.post<ResponseData<Display>>(
     '/api/displays',
-    props
+    {
+      roomId,
+      name,
+      cardValue,
+      isHost,
+    }
   );
 
   const rawDisplay = ZodDisplayRaw.parse(displayDisplays.data.data);
   return rawDisplay;
 }
 
-async function updateDisplay({ roomId, name, id, cardValue, isHost }: Display) {
+async function updateDisplay({
+  roomId,
+  name,
+  id,
+  cardValue,
+  isHost,
+}: Display): Promise<Display> {
   const { axiosInstance } = connectAxios();
   const displayData = await axiosInstance.patch<ResponseData<DisplayRaw>>(
     `/api/displays/${id}`,
@@ -170,21 +172,16 @@ async function updateDisplay({ roomId, name, id, cardValue, isHost }: Display) {
   );
 
   const rawDisplay = ZodDisplayRaw.parse(displayData.data.data);
-  return rawDisplay;
+  const transformedDisplay = displayRawToDisplay(rawDisplay);
+  return transformedDisplay;
 }
 
 export {
   createRoom,
-  //   displayFromFirestore,
-  //   getDisplaysFromQuerySnapshot,
   getRoomDisplays,
-  //   getRoomDisplaysSnapshotQuery,
   getRooms,
   getRoomById,
   getRoomByName,
-  //   getRoomSnapshotQuery,
-  //   resetCardValues,
-  //   setRoomLabel,
   createDisplay,
   getDisplayByName,
   updateDisplay,

@@ -1,16 +1,16 @@
 // import { connectFirebase } from '@/config/db';
 // import { useResetCardValues, useSetRoomLabel } from '@/hooks/roomsFirebase.hooks';
-import { useRoomData } from '../providers/RoomData.provider';
-import { DisplayWithId_Firebase } from '../providers/types';
+import { useRoomDisplays } from '../providers/roomDisplays.provider';
+// import { DisplayWithId_Firebase } from '../providers/types';
 import { ChangeEvent, useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 function HostHeader({
-  displaysData,
+  // displaysData,
   roomName,
   roomLabel,
 }: {
-  displaysData: DisplayWithId_Firebase[] | undefined;
+  // displaysData: DisplayWithId_Firebase[] | undefined;
   roomName: string;
   roomLabel: string | undefined;
 }) {
@@ -66,7 +66,7 @@ function HostHeader({
 
 function Header() {
   const navigate = useNavigate();
-  // const { roomData } = useRoomData();
+  // const { roomData } = useRoomDisplays();
   const { roomName } = useParams();
   // const { state } = useLocation();
   // const { auth } = connectFirebase();

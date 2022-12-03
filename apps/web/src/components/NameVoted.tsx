@@ -1,41 +1,35 @@
-import { useRoomData } from '../providers/RoomData.provider';
 import { useEffect, useState } from 'react';
+import { useRoomDisplays } from '../providers/roomDisplays.provider';
 import './NameVoted.css';
 
 function NameVoted() {
-  const { roomData } = useRoomData();
-  const [displayNameAndVoted, setDisplayNameAndVoted] = useState<{ name: string; voted: number }[]>(
-    []
-  );
-  const displaysData = roomData.displays;
+  const { roomDisplays } = useRoomDisplays();
+  const [displayNameAndVoted, setDisplayNameAndVoted] = useState<
+    { name: string; voted: number }[]
+  >([]);
+  const displays = roomDisplays.displays;
 
   useEffect(() => {
     const displayNameVoted: { name: string; voted: number }[] = [];
-    if (roomData) {
-      displaysData.forEach(({ name, cardValue }) => {
+    if (displays) {
+      displays.forEach(({ name, cardValue }) => {
         displayNameVoted.push({
           name,
           voted: cardValue,
         });
       });
     }
-
-    // displayNameVoted.sort((a, b) => {
-    //   return a.name.localeCompare(b.name);
-    // });
-
-    setDisplayNameAndVoted(displayNameVoted);
-  }, [displaysData, roomData]);
+  });
 
   const nameVoted = displayNameAndVoted.filter(({ voted }) => voted);
 
   return (
-    <section className="name-voted-wrapper">
+    <section className='name-voted-wrapper'>
       <h3>Room voting results:</h3>
       <h5>
         {nameVoted.length} of {displayNameAndVoted.length} voted
       </h5>
-      <div className="voted-wrapper">
+      <div className='voted-wrapper'>
         {displayNameAndVoted.length === 0 && <div>No data to display</div>}
         {displayNameAndVoted.length &&
           displayNameAndVoted.map(({ name, voted }, index) => {

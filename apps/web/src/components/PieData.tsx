@@ -1,5 +1,6 @@
+import { Display } from 'planning-poker-types';
 import { PieChart } from 'react-minimal-pie-chart';
-import { useRoomData } from '../providers/RoomData.provider';
+import { useRoomDisplays } from '../providers/roomDisplays.provider';
 import './PieData.css';
 
 const cardColors = [
@@ -15,16 +16,16 @@ const cardColors = [
 ];
 
 function PieData() {
-  const { roomData } = useRoomData();
+  const { roomDisplays } = useRoomDisplays();
   const numberMap = new Map<number, number>();
-  const displaysData = roomData.displays;
+  const displays = roomDisplays.displays;
 
   /**
    * 1. Get all cards to populate pie chard
    *  -- 1. Associate cards with the user && value
    * 2. Get the card for this user (to update the card selection)
    */
-  displaysData.forEach(({ cardValue }) => {
+  displays.forEach(({ cardValue }) => {
     if (typeof cardValue === 'number') {
       if (cardValue > 0) {
         const found = numberMap.get(cardValue);

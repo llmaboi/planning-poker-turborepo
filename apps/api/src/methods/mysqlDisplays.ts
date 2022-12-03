@@ -72,8 +72,9 @@ async function updateDisplay(
 ): PromiseData<DisplayRaw> {
   let queryString = 'UPDATE Displays ';
   queryString += `SET name = "${displayData.name}", `;
-  queryString += 'room_id = ' + displayData.roomId.toString() + ' ';
-  queryString += 'card_value = ' + displayData.cardValue.toString() + ' ';
+  queryString += 'room_id = ' + displayData.roomId.toString() + ', ';
+  queryString += 'card_value = ' + displayData.cardValue.toString() + ', ';
+  queryString += 'is_host = ' + displayData.isHost.toString() + ' ';
   queryString += 'WHERE id = ' + displayData.id.toString();
 
   const [result] = await connection.query<ResultSetHeader>(queryString);

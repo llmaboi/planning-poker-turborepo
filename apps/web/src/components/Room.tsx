@@ -1,5 +1,5 @@
 import { useUpdateDisplay } from '../hooks/roomsFastify.hooks';
-import { useRoomData } from '../providers/RoomData.provider';
+import { useRoomDisplays } from '../providers/roomDisplays.provider';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Card from './Card';
@@ -37,24 +37,26 @@ function HasRoomAndDisplay({
   displayName: string;
 }) {
   const parsedRoomId = parseInt(roomId);
+  const { roomDisplays } = useRoomDisplays();
   const [currentDisplay, setCurrentDisplay] = useState<Display>();
   const displayMutation = useUpdateDisplay({ roomId: parsedRoomId });
-  const { roomData } = useRoomData();
-  const displaysData = roomData.displays;
+  const displays = roomDisplays.displays;
 
   useEffect(() => {
-    if (displaysData) {
-      const found = displaysData.find(
-        (display) => display.name === displayName
-      );
+    if (roomDisplays.displays) {
+      const found = displays.find((display) => {
+        return display.name === displayName;
+      });
       if (found) {
         setCurrentDisplay(found);
       }
     }
-  }, [displaysData, displayName]);
+  }, [roomDisplays, displayName]);
 
-  function addCard(number: number) {
+  function updateDisplayCardValue(number: number) {
+    console.log('currentDisplay: ', currentDisplay);
     if (currentDisplay) {
+      console.log('mine: ', { ...currentDisplay, cardValue: number });
       displayMutation.mutate({
         ...currentDisplay,
         cardValue: number,
@@ -84,16 +86,16 @@ function HasRoomAndDisplay({
                 typeof selectedNumber === 'number' && selectedNumber > 0
               }
               number={number}
-              onCardClick={addCard}
+              onCardClick={updateDisplayCardValue}
               selectedNumber={selectedNumber}
             />
           );
         })}
       </div>
 
-      {typeof roomData !== 'undefined' && <NameVoted />}
+      {displays && <NameVoted />}
 
-      {typeof roomData !== 'undefined' && <PieData />}
+      {displays && <PieData />}
 
       <div className='reset-selection'>
         <button onClick={resetSelection}>Reset Selection</button>

@@ -28,6 +28,7 @@ interface UpdateDisplayParams extends GetDisplayParams {
     roomId: number;
     name: string;
     cardValue: number;
+    isHost: boolean;
   };
 }
 
@@ -81,7 +82,7 @@ const displayRoutes: FastifyPluginAsync = async (fastify) => {
     '/displays/:id',
     async (request, reply) => {
       const { id } = request.params;
-      const { roomId, name, cardValue } = request.body;
+      const { roomId, name, cardValue, isHost } = request.body;
 
       try {
         const parsedDisplayData = ZodDisplay.parse({
@@ -89,6 +90,7 @@ const displayRoutes: FastifyPluginAsync = async (fastify) => {
           roomId,
           name,
           cardValue,
+          isHost,
         });
 
         const displayData = await updateDisplay(
