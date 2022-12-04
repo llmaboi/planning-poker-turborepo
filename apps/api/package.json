@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "sh -c \"npm run docker:up && ./wait-for-it.sh localhost:3306 && NODE_ENV=test nodemon src/index.ts\"",
+    "dev": "sh -c \"npm run docker:up && ./wait-for-it.sh localhost:3306 -t 0 && NODE_ENV=test nodemon src/index.ts\"",
     "dev_old": "rm -rf ./dist && mkdir ./dist && cp ./.env* ./dist/ && npm run docker:up && sleep 10 && npx tsc && NODE_ENV=test node dist/index.js",
     "dev:online": "rm -rf ./dist && npx tsc && node dist/index.js",
     "docker:up": "docker compose --env-file ./.env.test up -d",

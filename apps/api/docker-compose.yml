@@ -2,11 +2,10 @@
 version: '1.0'
 services:
 ### MySQL Container
-  mysql-planning-poker:
-    image: mysql:latest
-    restart: always
+  mysql:
     env_file:
       - ./.env.test 
+    restart: always
     ports:
       - ${MYSQL_PORT}:3306
     build:

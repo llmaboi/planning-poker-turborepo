@@ -23,6 +23,7 @@ async function start() {
       server.printRoutes();
     });
   } catch (error) {
+    console.log('Server not started...');
     console.error(error);
     process.exit(1);
   }
