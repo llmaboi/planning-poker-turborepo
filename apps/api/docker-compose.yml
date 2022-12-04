@@ -2,9 +2,13 @@
 version: '1.0'
 services:
 ### MySQL Container
-  mysql:
+  mysql-planning-poker:
+    image: mysql:latest
+    restart: always
     env_file:
       - ./.env.test 
+    ports:
+      - ${MYSQL_PORT}:3306
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,5 +18,3 @@ services:
         - MYSQL_USER=${MYSQL_USER}
         - MYSQL_PASSWORD=${MYSQL_PASSWORD}
         - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-    ports:
-      - ${MYSQL_PORT}:3306

@@ -49,8 +49,15 @@ describe('Route: /displays/:id', () => {
       const createResponse = await testServer.inject({
         method: 'POST',
         url: '/api/displays',
-        payload: { roomId: testDisplay.room_id, name: testDisplay.name },
+        payload: {
+          roomId: testDisplay.room_id,
+          name: testDisplay.name,
+          cardValue: testDisplay.card_value,
+          isHost: testDisplay.is_host === 1,
+        },
       });
+
+      console.log(createResponse.json());
       expect(createResponse.statusCode).toEqual(200);
       const { data: createData } = createResponse.json<{ data: DisplayRaw }>();
       const { success: createSuccess } = ZodDisplayRaw.safeParse(createData);
@@ -67,7 +74,12 @@ describe('Route: /displays/:id', () => {
       const updateResponse = await testServer.inject({
         method: 'PATCH',
         url: '/api/displays/' + createData.id.toString(),
-        payload: { roomId: newDisplay.room_id, name: newDisplay.name },
+        payload: {
+          roomId: newDisplay.room_id,
+          name: newDisplay.name,
+          cardValue: newDisplay.card_value,
+          isHost: newDisplay.is_host === 1,
+        },
       });
 
       expect(updateResponse.statusCode).toEqual(200);
