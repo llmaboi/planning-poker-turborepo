@@ -21,11 +21,7 @@ import { displayRawToDisplay } from '../api/helpers';
 
 function useGetRoomDisplays({ roomId }: { roomId: number }) {
   return useQuery<Display[]>(['displays', roomId], async () => {
-    const displaysData = await getRoomDisplays(roomId);
-
-    const displays = displaysData.map((displayRaw) =>
-      displayRawToDisplay(displayRaw)
-    );
+    const displays = await getRoomDisplays(roomId);
 
     return displays;
   });
@@ -43,7 +39,7 @@ interface UpdateDisplayProps {
  */
 function useUpdateDisplay({ roomId }: { roomId: number }) {
   return useMutation(
-    ({ id, cardValue, isHost, name }: UpdateDisplayProps) =>
+    ({ id, cardValue, isHost, name }: UpdateDisplayProps): Promise<Display> =>
       updateDisplay({ roomId, id, cardValue, isHost, name }),
     {
       onSuccess: (data) => {
@@ -67,17 +63,15 @@ function useFindOrCreateDisplayByName() {
       isHost?: boolean;
     }): Promise<Display> => {
       try {
-        const displayRaw = await getDisplayByName(displayName);
-        const display = displayRawToDisplay(displayRaw);
+        const display = await getDisplayByName(displayName);
         return display;
       } catch (error) {
-        const createdDisplay = await createDisplay({
+        const display = await createDisplay({
           roomId,
           name: displayName,
           isHost,
           cardValue,
         });
-        const display = displayRawToDisplay(createdDisplay);
         return display;
       }
     },

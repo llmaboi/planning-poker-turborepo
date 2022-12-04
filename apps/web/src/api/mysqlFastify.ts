@@ -11,7 +11,7 @@ import { displayRawToDisplay } from './helpers';
 
 // TODO: Implement react-query in the hooks...
 // TODO: add transformers.
-async function getRoomDisplays(roomId: number) {
+async function getRoomDisplays(roomId: number): Promise<Display[]> {
   const { axiosInstance } = connectAxios();
   const roomDisplays = await axiosInstance.get<ResponseData<DisplayRaw[]>>(
     `/api/displays/room/${roomId}`
@@ -21,7 +21,8 @@ async function getRoomDisplays(roomId: number) {
   const rawDisplays = roomDisplays.data.data.map((item) =>
     ZodDisplayRaw.parse(item)
   );
-  return rawDisplays;
+  const transformedDisplays = rawDisplays.map(displayRawToDisplay);
+  return transformedDisplays;
 }
 
 let websocket: WebSocket;
@@ -59,7 +60,7 @@ function websocketRoomDisplays(
   return { websocket };
 }
 
-async function getRoomByName(roomName: string) {
+async function getRoomByName(roomName: string): Promise<Room> {
   const { axiosInstance } = connectAxios();
   const roomDisplays = await axiosInstance.get<ResponseData<Room>>(
     '/api/rooms/name',
@@ -78,7 +79,7 @@ async function createRoom({
 }: {
   roomName: string;
   roomLabel?: string;
-}) {
+}): Promise<Room> {
   const { axiosInstance } = connectAxios();
   const roomDisplays = await axiosInstance.post<ResponseData<Room>>(
     '/api/rooms',
@@ -92,7 +93,7 @@ async function createRoom({
   return rawRoom;
 }
 
-async function getRooms() {
+async function getRooms(): Promise<Room[]> {
   const { axiosInstance } = connectAxios();
   const { data: roomsData } = await axiosInstance.get<ResponseData<Room[]>>(
     '/api/rooms'
@@ -102,7 +103,7 @@ async function getRooms() {
   return rawRooms;
 }
 
-async function getRoomById(roomId: number) {
+async function getRoomById(roomId: number): Promise<Room> {
   const { axiosInstance } = connectAxios();
   // const roomDisplays = await axiosInstance.get<ResponseData<Room>>(`${API_BASE}/rooms/${roomId}`);
   const roomDisplays = await axiosInstance.get<ResponseData<Room>>(
@@ -113,7 +114,7 @@ async function getRoomById(roomId: number) {
   return rawRoom;
 }
 
-async function getDisplayByName(displayName: string) {
+async function getDisplayByName(displayName: string): Promise<Display> {
   const { axiosInstance } = connectAxios();
   const displayDisplays = await axiosInstance.get<ResponseData<Display>>(
     '/api/displays/name',
@@ -123,7 +124,8 @@ async function getDisplayByName(displayName: string) {
   );
 
   const rawDisplay = ZodDisplayRaw.parse(displayDisplays.data.data);
-  return rawDisplay;
+  const transformedDisplay = displayRawToDisplay(rawDisplay);
+  return transformedDisplay;
 }
 
 async function createDisplay({
@@ -149,7 +151,8 @@ async function createDisplay({
   );
 
   const rawDisplay = ZodDisplayRaw.parse(displayDisplays.data.data);
-  return rawDisplay;
+  const transformedDisplay = displayRawToDisplay(rawDisplay);
+  return transformedDisplay;
 }
 
 async function updateDisplay({
