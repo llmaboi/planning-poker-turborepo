@@ -10,6 +10,7 @@ import {
   useUpdateRoom,
   useUpdateRoomDisplayCards,
 } from '../hooks/roomsFastify.hooks';
+import './Header.css';
 
 function HostHeader({ room }: { room: Room }) {
   const resetCardValuesMutation = useUpdateRoomDisplayCards();
@@ -40,20 +41,25 @@ function HostHeader({ room }: { room: Room }) {
 
   return (
     <>
+      <label id='room-label'>
+        Room Label:{' '}
+        <input
+          disabled={updateRoomLabel.isLoading}
+          type='text'
+          value={label}
+          onChange={handleLabelChange}
+        />
+      </label>
+
+      <button disabled={updateRoomLabel.isLoading} onClick={updateLabel}>
+        Update label
+      </button>
+
       <button
         disabled={resetCardValuesMutation.isLoading}
         onClick={resetCardData}
       >
         Reset card data
-      </button>
-      <input
-        disabled={updateRoomLabel.isLoading}
-        type='text'
-        value={label}
-        onChange={handleLabelChange}
-      />
-      <button disabled={updateRoomLabel.isLoading} onClick={updateLabel}>
-        Update label
       </button>
     </>
   );
@@ -111,15 +117,11 @@ function Header() {
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-evenly',
-      }}
-    >
-      {isHost ? 'true' : 'false'} " " {isHost && <HostHeader room={room} />}
-      {!isHost && <>Room Label: {room && room.label ? room.label : 'NONE'}</>}
+    <div id='header-wrapper'>
+      {isHost && <HostHeader room={room} />}
+      {!isHost && (
+        <>Room Label: {room && room.label ? room.label : 'No room label'}</>
+      )}
       <button onClick={signOut}>Sign Out</button>
     </div>
   );
