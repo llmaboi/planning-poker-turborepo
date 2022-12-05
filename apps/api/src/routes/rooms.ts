@@ -5,7 +5,9 @@ import {
   getRoom,
   getRooms,
   updateRoom,
+  updateRoomDisplayCards,
 } from '../methods/mysqlRooms';
+import { getRoomSockets } from './roomSockets';
 
 interface RoomParams extends RequestGenericInterface {
   Params: {
@@ -35,7 +37,7 @@ const roomRoutes: FastifyPluginAsync = async (fastify) => {
     try {
       return getRoom(fastify.mysql, id);
     } catch (err) {
-      return reply.send(500); //.json({ error: err });
+      return reply.code(500).send(JSON.stringify(err));
     }
   });
 
@@ -43,7 +45,7 @@ const roomRoutes: FastifyPluginAsync = async (fastify) => {
     try {
       return getRooms(fastify.mysql);
     } catch (err) {
-      return reply.send(500); //.json({ error: err });
+      return reply.code(500).send(JSON.stringify(err));
     }
   });
 
@@ -81,6 +83,28 @@ const roomRoutes: FastifyPluginAsync = async (fastify) => {
       });
     } catch (err) {
       console.error(err);
+      return reply.code(500).send(JSON.stringify(err));
+    }
+  });
+
+  fastify.patch<RoomParams>('/rooms/:id/card-reset', async (request, reply) => {
+    const { id } = request.params;
+    const { roomSockets } = getRoomSockets();
+
+    try {
+      const displaysRaw = await updateRoomDisplayCards(fastify.mysql, id);
+      const roomSocket = roomSockets.get(parseInt(id));
+
+      if (roomSocket) {
+        roomSocket.forEach((socket) => {
+          if (socket.OPEN) {
+            socket.send(JSON.stringify(displaysRaw));
+          }
+        });
+      }
+
+      return displaysRaw;
+    } catch (err) {
       return reply.code(500).send(JSON.stringify(err));
     }
   });

@@ -4,37 +4,24 @@ import { useRoomDisplays } from '../providers/roomDisplays.provider';
 // import { DisplayWithId_Firebase } from '../providers/types';
 import { ChangeEvent, useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Display, Room } from 'planning-poker-types';
+import {
+  useGetRoomById,
+  useUpdateRoom,
+  useUpdateRoomDisplayCards,
+} from '../hooks/roomsFastify.hooks';
 
-function HostHeader({
-  // displaysData,
-  roomName,
-  roomLabel,
-}: {
-  // displaysData: DisplayWithId_Firebase[] | undefined;
-  roomName: string;
-  roomLabel: string | undefined;
-}) {
-  // const resetCardValuesMutation = useResetCardValues({ roomName });
-  // const setRoomLabelMutation = useSetRoomLabel({ roomName });
-  const [label, setLabel] = useState(roomLabel || '');
+function HostHeader({ room }: { room: Room }) {
+  const resetCardValuesMutation = useUpdateRoomDisplayCards();
+  const updateRoomLabel = useUpdateRoom();
+  const [label, setLabel] = useState(room.label || '');
 
-  // let displayNames: string[] = [];
+  let displayNames: string[] = [];
 
-  // useEffect(() => {
-  //   if (displaysData) {
-  //     // eslint-disable-next-line react-hooks/exhaustive-deps
-  //     displayNames = displaysData.map((room) => room.id);
-  //   }
-  // }, [displaysData]);
-
-  // function resetCardData() {
-  //   const newData: Pick<DisplayWithId_Firebase, 'id' | 'cardValue'>[] = [];
-
-  //   displayNames.forEach((name) => {
-  //     newData.push({ id: name, cardValue: 0 });
-  //   });
-  //   // resetCardValuesMutation.mutate({ displayData: newData });
-  // }
+  function resetCardData() {
+    // TODO: write simpler FN to reset room cards...
+    resetCardValuesMutation.mutate(room.id);
+  }
 
   function handleLabelChange(event: ChangeEvent<HTMLInputElement>) {
     const newLabel = event.target.value;
@@ -42,64 +29,86 @@ function HostHeader({
   }
 
   function updateLabel() {
-    // TODO: Add verification on label...
-    // setRoomLabelMutation.mutate(label);
+    if (!label || !label.length) {
+      // TODO: make component with "reset"
+      console.error('invalid label');
+      return <p>An invalid label was provided</p>;
+    }
+
+    updateRoomLabel.mutate({ ...room, label });
   }
 
   return (
     <>
-      {/* <button disabled={resetCardValuesMutation.isLoading} onClick={resetCardData}>
+      <button
+        disabled={resetCardValuesMutation.isLoading}
+        onClick={resetCardData}
+      >
         Reset card data
       </button>
       <input
-        disabled={setRoomLabelMutation.isLoading}
-        type="text"
+        disabled={updateRoomLabel.isLoading}
+        type='text'
         value={label}
         onChange={handleLabelChange}
       />
-      <button disabled={setRoomLabelMutation.isLoading} onClick={updateLabel}>
+      <button disabled={updateRoomLabel.isLoading} onClick={updateLabel}>
         Update label
-      </button> */}
+      </button>
     </>
   );
 }
 
 function Header() {
   const navigate = useNavigate();
-  // const { roomData } = useRoomDisplays();
-  const { roomName } = useParams();
-  // const { state } = useLocation();
-  // const { auth } = connectFirebase();
+  const { roomId } = useParams();
+  const parsedRoomId = parseInt(roomId!);
+  const {
+    data: room,
+    isLoading,
+    isError,
+  } = useGetRoomById({ roomId: parsedRoomId });
+  const { roomDisplays } = useRoomDisplays();
+  const { state } = useLocation();
   const [isHost, setIsHost] = useState(false);
-  // const displaysData = roomData.displays;
+  const displaysData = roomDisplays.displays;
 
-  // useEffect(() => {
-  //   if (displaysData) {
-  //     const found = displaysData.find((room) => room.id === state.displayName);
+  useEffect(() => {
+    if (displaysData) {
+      const found = displaysData.find(
+        (display) => display.name === state.displayName
+      );
 
-  //     if (found) {
-  //       if (found.isHost) {
-  //         setIsHost(found.isHost);
-  //       }
-  //     }
-  //   }
-  // }, [displaysData, state.displayName]);
+      if (found) {
+        if (found.isHost) {
+          setIsHost(found.isHost);
+        }
+      }
+    }
+  }, [displaysData, state.displayName]);
 
-  // if (!roomName || !state || (state && !state.displayName)) {
-  //   navigate('/noAuth');
-  //   // TODO: Correct this...
-  //   return <div>Routing to No Auth...</div>;
-  // }
+  if (!parsedRoomId || !state || (state && !state.displayName)) {
+    navigate('/noAuth');
+    // TODO: Correct this...
+    return <div>Routing to No Auth...</div>;
+  }
 
-  // // TODO: Move this to a common header...
-  // function signOut() {
-  //   if (auth.currentUser) {
-  //     auth.signOut();
-  //     navigate('/noAuth');
-  //     // TODO: Correct this...
-  //     return <div>Routing to No Auth...</div>;
-  //   }
-  // }
+  // TODO: Move this to a common header...
+  function signOut() {
+    // TODO: Does state need to be reset?
+    navigate('/noAuth');
+    // TODO: Correct this...
+    return <div>Routing to No Auth...</div>;
+  }
+
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+
+  if (isError || (!isLoading && !room)) {
+    // TODO: add button to try again?
+    return <p>Something went wrong...</p>;
+  }
 
   return (
     <div
@@ -109,15 +118,9 @@ function Header() {
         justifyContent: 'space-evenly',
       }}
     >
-      {/* {isHost && (
-        <HostHeader
-          roomName={roomName}
-          displaysData={displaysData}
-          roomLabel={roomData.label || undefined}
-        />
-      )} */}
-      {/* {!isHost && <>Room Label: {roomData.label ? roomData.label : 'NONE'}</>}
-      <button onClick={signOut}>Sign Out</button> */}
+      {isHost ? 'true' : 'false'} " " {isHost && <HostHeader room={room} />}
+      {!isHost && <>Room Label: {room && room.label ? room.label : 'NONE'}</>}
+      <button onClick={signOut}>Sign Out</button>
     </div>
   );
 }

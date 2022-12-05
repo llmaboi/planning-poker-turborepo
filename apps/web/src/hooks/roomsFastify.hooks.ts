@@ -7,6 +7,8 @@ import {
   getRoomDisplays,
   getRooms,
   updateDisplay,
+  updateRoom,
+  updateRoomDisplayCards,
 } from '../api/mysqlFastify';
 import { queryClient } from '../config/queryClient';
 import { useMutation, useQuery } from 'react-query';
@@ -49,7 +51,7 @@ function useUpdateDisplay({ roomId }: { roomId: number }) {
   );
 }
 
-function useFindOrCreateDisplayByName() {
+function useCreateOrUpdateDisplayByName() {
   return useMutation(
     async ({
       displayName,
@@ -59,12 +61,32 @@ function useFindOrCreateDisplayByName() {
     }: {
       displayName: string;
       roomId: number;
-      cardValue?: number;
-      isHost?: boolean;
+      cardValue: number;
+      isHost: boolean;
     }): Promise<Display> => {
       try {
-        const display = await getDisplayByName(displayName);
-        return display;
+        const display = await getDisplayByName(displayName, roomId);
+        // TODO: Ensure the values match so update the display...
+
+        // If the results match just return it
+        if (
+          display.roomId === roomId &&
+          display.cardValue === cardValue &&
+          display.isHost === isHost
+        ) {
+          return display;
+        }
+
+        // otherwise update then return updated value
+        const updatedDisplay = await updateDisplay({
+          roomId,
+          name: displayName,
+          id: display.id,
+          cardValue,
+          isHost,
+        });
+
+        return updatedDisplay;
       } catch (error) {
         const display = await createDisplay({
           roomId,
@@ -127,12 +149,31 @@ function useGetRoomById({ roomId }: { roomId: number }) {
   });
 }
 
+function useUpdateRoom() {
+  return useMutation(async ({ id, label, name }: Room) => {
+    const roomRaw = await updateRoom({ id, label, name });
+
+    return roomRaw;
+  });
+}
+
+function useUpdateRoomDisplayCards() {
+  return useMutation(async (id: number) => {
+    const displays = await updateRoomDisplayCards(id);
+    // TODO: Reset some state somewhere?
+
+    return displays;
+  });
+}
+
 export {
   useCreateRoom,
   useGetRooms,
   useGetRoomById,
+  useUpdateRoom,
+  useUpdateRoomDisplayCards,
   useGetRoomDisplays,
   useUpdateDisplay,
-  useFindOrCreateDisplayByName,
+  useCreateOrUpdateDisplayByName,
 };
 export type { UpdateDisplayProps };

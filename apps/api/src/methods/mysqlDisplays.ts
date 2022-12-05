@@ -50,6 +50,29 @@ async function getDisplay(
 }
 
 /**
+ * Get single display information.
+ * @param name - display name
+ */
+async function getDisplayByName(
+  connection: MySQLPromisePool,
+  name: string,
+  roomId: number
+): PromiseData<DisplayRaw> {
+  let queryString = 'SELECT * FROM Displays WHERE NAME = "';
+  queryString += name + '" ';
+  queryString += ' AND room_id = ' + roomId + ';';
+
+  const [rows] = await connection.query<RowDataPacket[]>(queryString);
+  if (Array.isArray(rows) && rows.length === 1) {
+    const row = rows[0];
+
+    return { data: ZodDisplayRaw.parse(row) };
+  }
+
+  throw new Error('There was an error finding your display');
+}
+
+/**
  * Get all displays for a given room.
  * @param id - room ID
  */
@@ -86,4 +109,10 @@ async function updateDisplay(
   throw new Error('There was an error updating your display');
 }
 
-export { createDisplay, getDisplay, getDisplaysForRoom, updateDisplay };
+export {
+  createDisplay,
+  getDisplay,
+  getDisplayByName,
+  getDisplaysForRoom,
+  updateDisplay,
+};

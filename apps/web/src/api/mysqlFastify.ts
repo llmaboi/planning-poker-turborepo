@@ -3,6 +3,7 @@ import {
   DisplayRaw,
   ResponseData,
   Room,
+  ZodDisplay,
   ZodDisplayRaw,
   ZodRoomRaw,
 } from 'planning-poker-types';
@@ -114,12 +115,15 @@ async function getRoomById(roomId: number): Promise<Room> {
   return rawRoom;
 }
 
-async function getDisplayByName(displayName: string): Promise<Display> {
+async function getDisplayByName(
+  displayName: string,
+  roomId: number
+): Promise<Display> {
   const { axiosInstance } = connectAxios();
   const displayDisplays = await axiosInstance.get<ResponseData<Display>>(
     '/api/displays/name',
     {
-      params: { name: displayName },
+      params: { name: displayName, roomId: roomId },
     }
   );
 
@@ -179,6 +183,34 @@ async function updateDisplay({
   return transformedDisplay;
 }
 
+async function updateRoom({ name, id, label }: Room): Promise<Room> {
+  const { axiosInstance } = connectAxios();
+  const roomData = await axiosInstance.patch<ResponseData<Room>>(
+    `/api/rooms/${id}`,
+    {
+      label,
+      name,
+    }
+  );
+
+  const rawRoom = ZodRoomRaw.parse(roomData.data.data);
+  return rawRoom;
+}
+
+async function updateRoomDisplayCards(id: number): Promise<Display[]> {
+  const { axiosInstance } = connectAxios();
+  const displaysData = await axiosInstance.patch<ResponseData<DisplayRaw[]>>(
+    `/api/rooms/${id}/card-reset`
+  );
+
+  console.log('displaysData: ', displaysData);
+
+  const displays = displaysData.data.data.map((display) =>
+    displayRawToDisplay(ZodDisplayRaw.parse(display))
+  );
+  return displays;
+}
+
 export {
   createRoom,
   getRoomDisplays,
@@ -188,5 +220,7 @@ export {
   createDisplay,
   getDisplayByName,
   updateDisplay,
+  updateRoom,
+  updateRoomDisplayCards,
   websocketRoomDisplays,
 };

@@ -3,10 +3,12 @@ import Websocket from 'ws';
 import {
   createDisplay,
   getDisplay,
+  getDisplayByName,
   getDisplaysForRoom,
   updateDisplay,
 } from '../methods/mysqlDisplays';
 import { ZodDisplay } from 'planning-poker-types';
+import { getRoomSockets } from './roomSockets';
 
 interface GetDisplayParams extends RequestGenericInterface {
   Params: {
@@ -32,7 +34,14 @@ interface UpdateDisplayParams extends GetDisplayParams {
   };
 }
 
-const roomSockets = new Map<number, Websocket[]>();
+interface GetDisplayByNameParams extends RequestGenericInterface {
+  Querystring: {
+    name: string;
+    roomId: number;
+  };
+}
+
+// const roomSockets = new Map<number, Websocket[]>();
 
 // eslint-disable-next-line @typescript-eslint/require-await
 const displayRoutes: FastifyPluginAsync = async (fastify) => {
@@ -40,6 +49,7 @@ const displayRoutes: FastifyPluginAsync = async (fastify) => {
     '/displays/room/:id/socket',
     { websocket: true },
     (connection, request) => {
+      const { roomSockets } = getRoomSockets();
       const { id } = request.params;
 
       // Registration only happens on opening of the connection.
@@ -63,7 +73,7 @@ const displayRoutes: FastifyPluginAsync = async (fastify) => {
       try {
         return getDisplaysForRoom(fastify.mysql, id);
       } catch (err) {
-        return reply.send(500); // json message?
+        return reply.code(500).send(JSON.stringify(err));
       }
     }
   );
@@ -74,7 +84,7 @@ const displayRoutes: FastifyPluginAsync = async (fastify) => {
     try {
       return getDisplay(fastify.mysql, id);
     } catch (err) {
-      return reply.send(500); // json message?
+      return reply.code(500).send(JSON.stringify(err));
     }
   });
 
@@ -83,6 +93,7 @@ const displayRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       const { id } = request.params;
       const { roomId, name, cardValue, isHost } = request.body;
+      const { roomSockets } = getRoomSockets();
 
       try {
         const parsedDisplayData = ZodDisplay.parse({
@@ -118,8 +129,22 @@ const displayRoutes: FastifyPluginAsync = async (fastify) => {
     }
   );
 
+  fastify.get<GetDisplayByNameParams>(
+    '/displays/name',
+    async (request, reply) => {
+      const { name, roomId } = request.query;
+
+      try {
+        return getDisplayByName(fastify.mysql, name, roomId);
+      } catch (err) {
+        return reply.code(500).send(JSON.stringify(err));
+      }
+    }
+  );
+
   fastify.post<CreateDisplayParams>('/displays', async (request, reply) => {
     const { roomId, name, cardValue, isHost } = request.body;
+    const { roomSockets } = getRoomSockets();
 
     try {
       const {

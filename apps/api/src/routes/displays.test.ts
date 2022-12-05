@@ -57,7 +57,6 @@ describe('Route: /displays/:id', () => {
         },
       });
 
-      console.log(createResponse.json());
       expect(createResponse.statusCode).toEqual(200);
       const { data: createData } = createResponse.json<{ data: DisplayRaw }>();
       const { success: createSuccess } = ZodDisplayRaw.safeParse(createData);

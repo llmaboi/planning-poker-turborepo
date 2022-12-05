@@ -1,6 +1,13 @@
 import { MySQLPromisePool } from '@fastify/mysql';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
-import { PromiseData, Room, ZodRoomRaw } from 'planning-poker-types';
+import {
+  Display,
+  DisplayRaw,
+  PromiseData,
+  Room,
+  ZodRoomRaw,
+} from 'planning-poker-types';
+import { getDisplaysForRoom } from './mysqlDisplays';
 
 async function createRoom(
   connection: MySQLPromisePool,
@@ -73,4 +80,21 @@ async function updateRoom(
   throw new Error('There was an error updating your room');
 }
 
-export { createRoom, getRoom, getRooms, updateRoom };
+async function updateRoomDisplayCards(
+  connection: MySQLPromisePool,
+  roomId: string
+): PromiseData<DisplayRaw[]> {
+  let queryString = 'UPDATE Displays ';
+  queryString += 'SET card_value = 0';
+  queryString += ' WHERE room_id = ' + roomId + ';';
+
+  const [result] = await connection.query<ResultSetHeader>(queryString);
+
+  if (result.warningStatus === 0 && result.serverStatus === 2) {
+    return getDisplaysForRoom(connection, roomId);
+  }
+
+  return { data: [] };
+}
+
+export { createRoom, getRoom, getRooms, updateRoom, updateRoomDisplayCards };

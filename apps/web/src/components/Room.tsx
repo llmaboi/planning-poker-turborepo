@@ -54,7 +54,6 @@ function HasRoomAndDisplay({
   }, [roomDisplays, displayName]);
 
   function updateDisplayCardValue(number: number) {
-    console.log('currentDisplay: ', currentDisplay);
     if (currentDisplay) {
       displayMutation.mutate({
         ...currentDisplay,

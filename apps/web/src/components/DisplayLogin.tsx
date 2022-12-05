@@ -1,6 +1,6 @@
 import { useState, ChangeEvent, FormEvent } from 'react';
 import {
-  useFindOrCreateDisplayByName,
+  useCreateOrUpdateDisplayByName,
   useGetRoomById,
   useGetRoomDisplays,
 } from '../hooks/roomsFastify.hooks';
@@ -34,7 +34,7 @@ function DisplayLogin() {
   const params = useParams();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const roomId = parseInt(params.roomId!);
-  const findOrCreateDisplayMutation = useFindOrCreateDisplayByName();
+  const createOrUpdateDisplayMutation = useCreateOrUpdateDisplayByName();
   const { data: room, isLoading, isError } = useGetRoomById({ roomId });
 
   const navigate = useNavigate();
@@ -60,7 +60,7 @@ function DisplayLogin() {
       return;
     }
 
-    findOrCreateDisplayMutation.mutate(
+    createOrUpdateDisplayMutation.mutate(
       { roomId, cardValue: 0, isHost, displayName },
       {
         onSuccess: () => {
