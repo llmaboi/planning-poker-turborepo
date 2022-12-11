@@ -31,7 +31,7 @@ function NameVoted() {
       </h5>
       <div className='voted-wrapper'>
         {displayNameAndVoted.length === 0 && <div>No data to display</div>}
-        {displayNameAndVoted.length &&
+        {displayNameAndVoted.length > 0 &&
           displayNameAndVoted.map(({ name, voted }, index) => {
             return (
               <p key={index}>

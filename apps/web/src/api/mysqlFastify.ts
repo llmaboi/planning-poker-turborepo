@@ -8,7 +8,7 @@ import {
   ZodRoomRaw,
 } from 'planning-poker-types';
 import { connectAxios } from '../config/db';
-import { displayRawToDisplay } from './helpers';
+import { displayRawToDisplay, roomRawToRoom } from './helpers';
 
 // TODO: Implement react-query in the hooks...
 // TODO: add transformers.
@@ -71,7 +71,8 @@ async function getRoomByName(roomName: string): Promise<Room> {
   );
 
   const rawRoom = ZodRoomRaw.parse(roomDisplays.data.data);
-  return rawRoom;
+  const transformedRoom = roomRawToRoom(rawRoom);
+  return transformedRoom;
 }
 
 async function createRoom({
@@ -91,7 +92,8 @@ async function createRoom({
   );
 
   const rawRoom = ZodRoomRaw.parse(roomDisplays.data.data);
-  return rawRoom;
+  const transformedRoom = roomRawToRoom(rawRoom);
+  return transformedRoom;
 }
 
 async function getRooms(): Promise<Room[]> {
@@ -100,7 +102,9 @@ async function getRooms(): Promise<Room[]> {
     '/api/rooms'
   );
 
-  const rawRooms = roomsData.data.map((item) => ZodRoomRaw.parse(item));
+  const rawRooms = roomsData.data.map((item) =>
+    roomRawToRoom(ZodRoomRaw.parse(item))
+  );
   return rawRooms;
 }
 
@@ -112,7 +116,8 @@ async function getRoomById(roomId: number): Promise<Room> {
   );
 
   const rawRoom = ZodRoomRaw.parse(roomDisplays.data.data);
-  return rawRoom;
+  const transformedRoom = roomRawToRoom(rawRoom);
+  return transformedRoom;
 }
 
 async function getDisplayByName(
@@ -194,7 +199,8 @@ async function updateRoom({ name, id, label }: Room): Promise<Room> {
   );
 
   const rawRoom = ZodRoomRaw.parse(roomData.data.data);
-  return rawRoom;
+  const transformedRoom = roomRawToRoom(rawRoom);
+  return transformedRoom;
 }
 
 async function updateRoomDisplayCards(id: number): Promise<Display[]> {
@@ -202,8 +208,6 @@ async function updateRoomDisplayCards(id: number): Promise<Display[]> {
   const displaysData = await axiosInstance.patch<ResponseData<DisplayRaw[]>>(
     `/api/rooms/${id}/card-reset`
   );
-
-  console.log('displaysData: ', displaysData);
 
   const displays = displaysData.data.data.map((display) =>
     displayRawToDisplay(ZodDisplayRaw.parse(display))

@@ -14,10 +14,8 @@ import './Header.css';
 
 function HostHeader({ room }: { room: Room }) {
   const resetCardValuesMutation = useUpdateRoomDisplayCards();
-  const updateRoomLabel = useUpdateRoom();
+  const updateRoom = useUpdateRoom();
   const [label, setLabel] = useState(room.label || '');
-
-  let displayNames: string[] = [];
 
   function resetCardData() {
     // TODO: write simpler FN to reset room cards...
@@ -36,7 +34,12 @@ function HostHeader({ room }: { room: Room }) {
       return <p>An invalid label was provided</p>;
     }
 
-    updateRoomLabel.mutate({ ...room, label });
+    updateRoom.mutate({ ...room, label });
+  }
+
+  function handleShowVotes() {
+    // TODO: Add a value to show / hide votes if user is not "host"
+    updateRoom.mutate({ ...room, showVotes: !room.showVotes });
   }
 
   return (
@@ -44,14 +47,14 @@ function HostHeader({ room }: { room: Room }) {
       <label id='room-label'>
         Room Label:{' '}
         <input
-          disabled={updateRoomLabel.isLoading}
+          disabled={updateRoom.isLoading}
           type='text'
           value={label}
           onChange={handleLabelChange}
         />
       </label>
 
-      <button disabled={updateRoomLabel.isLoading} onClick={updateLabel}>
+      <button disabled={updateRoom.isLoading} onClick={updateLabel}>
         Update label
       </button>
 
@@ -61,6 +64,15 @@ function HostHeader({ room }: { room: Room }) {
       >
         Reset card data
       </button>
+      {room.showVotes ? (
+        <button disabled={updateRoom.isLoading} onClick={handleShowVotes}>
+          Hide Votes from users.
+        </button>
+      ) : (
+        <button disabled={updateRoom.isLoading} onClick={handleShowVotes}>
+          Show Votes to users.
+        </button>
+      )}
     </>
   );
 }

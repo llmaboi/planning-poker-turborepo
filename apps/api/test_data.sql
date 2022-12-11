@@ -25,6 +25,7 @@ CREATE TABLE `Rooms` (
 	`id` BIGINT NOT NULL AUTO_INCREMENT,
 	`name` varchar(255) NOT NULL,
 	`label` varchar(255),
+	`show_votes` BOOLEAN DEFAULT 1,
 	`utc_updated` datetime DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
 	PRIMARY KEY (`id`),
 	UNIQUE KEY `id_UNIQUE` (`id`)

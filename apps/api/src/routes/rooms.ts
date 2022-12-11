@@ -1,5 +1,5 @@
 import { FastifyPluginAsync, RequestGenericInterface } from 'fastify';
-import { ZodRoomRaw } from 'planning-poker-types';
+import { RoomRaw, ZodRoomRaw } from 'planning-poker-types';
 import {
   createRoom,
   getRoom,
@@ -7,7 +7,7 @@ import {
   updateRoom,
   updateRoomDisplayCards,
 } from '../methods/mysqlRooms';
-import { getRoomSockets } from './roomSockets';
+import { getRoomDisplaysSockets } from './roomDisplaysSockets';
 
 interface RoomParams extends RequestGenericInterface {
   Params: {
@@ -16,17 +16,11 @@ interface RoomParams extends RequestGenericInterface {
 }
 
 interface RoomCreate extends RequestGenericInterface {
-  Body: {
-    label: string | null;
-    name: string;
-  };
+  Body: Omit<RoomRaw, 'id'>;
 }
 
 interface RoomUpdate extends RoomParams {
-  Body: {
-    label: string | null;
-    name: string;
-  };
+  Body: RoomRaw;
 }
 
 // eslint-disable-next-line @typescript-eslint/require-await
@@ -51,16 +45,22 @@ const roomRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.patch<RoomUpdate>('/rooms/:id', async (request, reply) => {
     const { id } = request.params;
-    const { label, name } = request.body;
+    const { label, name, show_votes } = request.body;
 
     try {
       const parsedRoomData = ZodRoomRaw.parse({
         id: parseInt(id),
         label,
         name,
+        show_votes,
       });
 
-      return updateRoom(fastify.mysql, parsedRoomData);
+      return updateRoom(fastify.mysql, {
+        id: parsedRoomData.id,
+        label: parsedRoomData.label,
+        name: parsedRoomData.name,
+        showVotes: parsedRoomData.show_votes === 1,
+      });
     } catch (err) {
       console.error(err);
       return reply.code(500).send(JSON.stringify(err));
@@ -68,7 +68,7 @@ const roomRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.post<RoomCreate>('/rooms', async (request, reply) => {
-    const { label, name } = request.body;
+    const { show_votes, label, name } = request.body;
 
     try {
       const { label: parsedLabel, name: parsedName } = ZodRoomRaw.parse({
@@ -80,6 +80,7 @@ const roomRoutes: FastifyPluginAsync = async (fastify) => {
       return createRoom(fastify.mysql, {
         label: parsedLabel,
         name: parsedName,
+        showVotes: show_votes === 1,
       });
     } catch (err) {
       console.error(err);
@@ -89,11 +90,11 @@ const roomRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.patch<RoomParams>('/rooms/:id/card-reset', async (request, reply) => {
     const { id } = request.params;
-    const { roomSockets } = getRoomSockets();
+    const { roomDisplaysSockets } = getRoomDisplaysSockets();
 
     try {
       const displaysRaw = await updateRoomDisplayCards(fastify.mysql, id);
-      const roomSocket = roomSockets.get(parseInt(id));
+      const roomSocket = roomDisplaysSockets.get(parseInt(id));
 
       if (roomSocket) {
         roomSocket.forEach((socket) => {

@@ -150,8 +150,8 @@ function useGetRoomById({ roomId }: { roomId: number }) {
 }
 
 function useUpdateRoom() {
-  return useMutation(async ({ id, label, name }: Room) => {
-    const roomRaw = await updateRoom({ id, label, name });
+  return useMutation(async (room: Room) => {
+    const roomRaw = await updateRoom(room);
 
     return roomRaw;
   });

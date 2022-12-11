@@ -5,6 +5,7 @@ import {
   DisplayRaw,
   PromiseData,
   Room,
+  RoomRaw,
   ZodRoomRaw,
 } from 'planning-poker-types';
 import { getDisplaysForRoom } from './mysqlDisplays';
@@ -12,7 +13,7 @@ import { getDisplaysForRoom } from './mysqlDisplays';
 async function createRoom(
   connection: MySQLPromisePool,
   roomData: Omit<Room, 'id'>
-): PromiseData<Room> {
+): PromiseData<RoomRaw> {
   let queryString = 'INSERT INTO Rooms (name';
   if (roomData.label) {
     queryString += ', label';
@@ -37,7 +38,7 @@ async function createRoom(
 async function getRoom(
   connection: MySQLPromisePool,
   id: string
-): PromiseData<Room> {
+): PromiseData<RoomRaw> {
   let queryString = 'SELECT * FROM Rooms WHERE ID = "';
   queryString += id + '"';
 
@@ -51,7 +52,7 @@ async function getRoom(
   throw new Error('There was an error finding your room');
 }
 
-async function getRooms(connection: MySQLPromisePool): PromiseData<Room[]> {
+async function getRooms(connection: MySQLPromisePool): PromiseData<RoomRaw[]> {
   const queryString = 'SELECT * FROM Rooms';
 
   const [rows] = await connection.query<RowDataPacket[]>(queryString);
@@ -63,7 +64,7 @@ async function getRooms(connection: MySQLPromisePool): PromiseData<Room[]> {
 async function updateRoom(
   connection: MySQLPromisePool,
   roomData: Room
-): PromiseData<Room> {
+): PromiseData<RoomRaw> {
   let queryString = 'UPDATE Rooms ';
   queryString += `SET name = "${roomData.name}"`;
   if (roomData.label) {

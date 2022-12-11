@@ -8,7 +8,7 @@ import {
   updateDisplay,
 } from '../methods/mysqlDisplays';
 import { ZodDisplay } from 'planning-poker-types';
-import { getRoomSockets } from './roomSockets';
+import { getRoomDisplaysSockets } from './roomDisplaysSockets';
 
 interface GetDisplayParams extends RequestGenericInterface {
   Params: {
@@ -41,25 +41,26 @@ interface GetDisplayByNameParams extends RequestGenericInterface {
   };
 }
 
-// const roomSockets = new Map<number, Websocket[]>();
-
 // eslint-disable-next-line @typescript-eslint/require-await
 const displayRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get<GetDisplayParams>(
     '/displays/room/:id/socket',
     { websocket: true },
     (connection, request) => {
-      const { roomSockets } = getRoomSockets();
+      const { roomDisplaysSockets } = getRoomDisplaysSockets();
       const { id } = request.params;
 
       // Registration only happens on opening of the connection.
       if (connection.socket.OPEN) {
-        const existing = roomSockets.get(parseInt(id));
+        const existing = roomDisplaysSockets.get(parseInt(id));
 
         if (existing) {
-          roomSockets.set(parseInt(id), [...existing, connection.socket]);
+          roomDisplaysSockets.set(parseInt(id), [
+            ...existing,
+            connection.socket,
+          ]);
         } else {
-          roomSockets.set(parseInt(id), [connection.socket]);
+          roomDisplaysSockets.set(parseInt(id), [connection.socket]);
         }
       }
     }
@@ -93,7 +94,7 @@ const displayRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       const { id } = request.params;
       const { roomId, name, cardValue, isHost } = request.body;
-      const { roomSockets } = getRoomSockets();
+      const { roomDisplaysSockets } = getRoomDisplaysSockets();
 
       try {
         const parsedDisplayData = ZodDisplay.parse({
@@ -111,7 +112,7 @@ const displayRoutes: FastifyPluginAsync = async (fastify) => {
 
         void getDisplaysForRoom(fastify.mysql, roomId.toString()).then(
           (displays) => {
-            Array.from(roomSockets.values()).forEach((socket) => {
+            Array.from(roomDisplaysSockets.values()).forEach((socket) => {
               socket.forEach((webSocket) => {
                 if (webSocket.OPEN) {
                   webSocket.send(JSON.stringify(displays));
@@ -144,7 +145,7 @@ const displayRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.post<CreateDisplayParams>('/displays', async (request, reply) => {
     const { roomId, name, cardValue, isHost } = request.body;
-    const { roomSockets } = getRoomSockets();
+    const { roomDisplaysSockets } = getRoomDisplaysSockets();
 
     try {
       const {
@@ -169,7 +170,7 @@ const displayRoutes: FastifyPluginAsync = async (fastify) => {
 
       void getDisplaysForRoom(fastify.mysql, roomId.toString()).then(
         (displays) => {
-          Array.from(roomSockets.values()).forEach((socket) => {
+          Array.from(roomDisplaysSockets.values()).forEach((socket) => {
             socket.forEach((myWs) => {
               if (myWs.OPEN) {
                 myWs.send(JSON.stringify(displays));

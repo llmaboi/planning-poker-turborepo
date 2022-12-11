@@ -1,4 +1,4 @@
-import { Display, DisplayRaw } from 'planning-poker-types';
+import { Display, DisplayRaw, Room, RoomRaw } from 'planning-poker-types';
 
 function displayRawToDisplay({
   card_value,
@@ -14,4 +14,11 @@ function displayRawToDisplay({
   };
 }
 
-export { displayRawToDisplay };
+function roomRawToRoom({ show_votes, ...rest }: RoomRaw): Room {
+  return {
+    ...rest,
+    showVotes: show_votes === 1,
+  };
+}
+
+export { displayRawToDisplay, roomRawToRoom };
