@@ -188,13 +188,14 @@ async function updateDisplay({
   return transformedDisplay;
 }
 
-async function updateRoom({ name, id, label }: Room): Promise<Room> {
+async function updateRoom({ name, id, label, showVotes }: Room): Promise<Room> {
   const { axiosInstance } = connectAxios();
   const roomData = await axiosInstance.patch<ResponseData<Room>>(
     `/api/rooms/${id}`,
     {
       label,
       name,
+      showVotes,
     }
   );
 

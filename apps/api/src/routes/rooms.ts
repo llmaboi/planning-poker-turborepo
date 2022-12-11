@@ -20,7 +20,9 @@ interface RoomCreate extends RequestGenericInterface {
 }
 
 interface RoomUpdate extends RoomParams {
-  Body: RoomRaw;
+  Body: Omit<RoomRaw, 'show_votes'> & {
+    showVotes: boolean;
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/require-await
@@ -45,14 +47,14 @@ const roomRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.patch<RoomUpdate>('/rooms/:id', async (request, reply) => {
     const { id } = request.params;
-    const { label, name, show_votes } = request.body;
+    const { label, name, showVotes } = request.body;
 
     try {
       const parsedRoomData = ZodRoomRaw.parse({
         id: parseInt(id),
         label,
         name,
-        show_votes,
+        show_votes: showVotes ? 1 : 0,
       });
 
       return updateRoom(fastify.mysql, {

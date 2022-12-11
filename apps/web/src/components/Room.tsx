@@ -49,6 +49,9 @@ function HasRoomAndDisplay({
       });
       if (found) {
         setCurrentDisplay(found);
+      } else {
+        currentDisplay &&
+          setCurrentDisplay({ ...currentDisplay, cardValue: 0 });
       }
     }
   }, [roomDisplays, displayName]);
