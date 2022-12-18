@@ -25,6 +25,7 @@ const ZodEnvConfig = z.object({
 let envConfig: Config | undefined;
 
 function getEnvConfig() {
+  console.log('envConfig: ', envConfig);
   if (envConfig?.DB_HOST) {
     return envConfig;
   }
@@ -41,7 +42,9 @@ function getEnvConfig() {
   const parsedConfig = ZodEnvConfig.safeParse(process.env);
 
   if (!parsedConfig.success) {
-    throw new Error('Invalid ENV vars' + JSON.stringify(parsedConfig.error.format(), null, 2));
+    throw new Error(
+      'Invalid ENV vars' + JSON.stringify(parsedConfig.error.format(), null, 2)
+    );
   }
 
   envConfig = {
@@ -54,6 +57,7 @@ function getEnvConfig() {
     NODE_ENV: parsedConfig.data.NODE_ENV,
   };
 
+  console.log('envConfig: ', envConfig);
   return envConfig;
 }
 

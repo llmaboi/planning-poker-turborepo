@@ -1,0 +1,61 @@
+# docker compose --env-file ./.env.test  up
+version: "1.0"
+
+services:
+  mysql:
+    container_name: mysql
+    env_file:
+      - ./.env.test
+    restart: always
+    ports:
+      - ${MYSQL_PORT}:3306
+    build:
+      context: .
+      dockerfile: ./packages/mysql-planning-poker/Dockerfile
+    volumes:
+      - ./packages/mysql-planning-poker/test_data.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app_network
+
+  api:
+    container_name: api
+    env_file:
+      - ./.env.test
+    depends_on:
+      - "mysql"
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    restart: always
+    ports:
+      - 3500:3500
+    volumes:
+      - .:/app/apps/api/
+      - /apps/api/node_modules
+    networks:
+      - app_network
+
+  web:
+    container_name: web 
+    env_file:
+      - ./.env.test
+    depends_on:
+      - "mysql"
+      - "api"
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    restart: always
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/app/apps/web/
+      - /apps/web/node_modules
+    networks:
+      - app_network
+
+# Define a network, which allows containers to communicate
+# with each other, by using their container name as a hostname
+networks:
+  app_network:
+    external: true

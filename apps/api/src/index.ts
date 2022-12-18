@@ -18,7 +18,7 @@ async function start() {
     await registerMySQL(server);
 
     // TODO: I'm not sure if this is correct
-    server.listen({ port: envConfig.SERVER_PORT }, () => {
+    server.listen({ port: envConfig.SERVER_PORT, host: '0.0.0.0' }, () => {
       console.log('Server started...');
       server.printRoutes();
     });
