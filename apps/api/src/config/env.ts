@@ -25,7 +25,6 @@ const ZodEnvConfig = z.object({
 let envConfig: Config | undefined;
 
 function getEnvConfig() {
-  console.log('envConfig: ', envConfig);
   if (envConfig?.DB_HOST) {
     return envConfig;
   }
@@ -33,7 +32,11 @@ function getEnvConfig() {
   // Set up dotenv files
   if (process.env.NODE_ENV === 'test') {
     dotenv.config({
-      path: path.resolve(__dirname, '../../.env.test'),
+      path: path.resolve(__dirname, '../../../../.env.test'),
+    });
+  } else if (process.env.NODE_ENV === 'docker') {
+    dotenv.config({
+      path: path.resolve(__dirname, '../../../../.env.docker'),
     });
   } else {
     dotenv.config();
@@ -57,7 +60,6 @@ function getEnvConfig() {
     NODE_ENV: parsedConfig.data.NODE_ENV,
   };
 
-  console.log('envConfig: ', envConfig);
   return envConfig;
 }
 

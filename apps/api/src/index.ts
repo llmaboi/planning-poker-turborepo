@@ -3,7 +3,6 @@ import { getEnvConfig } from './config/env';
 import { registerMySQL } from './config/mysql';
 import { MySQLPromisePool } from '@fastify/mysql';
 
-// if you passed promise = true
 declare module 'fastify' {
   interface FastifyInstance {
     mysql: MySQLPromisePool;

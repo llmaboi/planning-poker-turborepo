@@ -1,4 +1,4 @@
-import fastifyMySQL from '@fastify/mysql/index';
+import fastifyMySQL from '@fastify/mysql';
 import { FastifyInstance } from 'fastify';
 import { getEnvConfig } from './env';
 

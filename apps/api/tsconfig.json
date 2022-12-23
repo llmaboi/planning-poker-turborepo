@@ -1,0 +1,11 @@
+{
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "target": "es6"
+  },
+  // "compilerOptions": { "typeRoots": ["src/index.d.ts"] },
+  "include": ["src"],
+  "paths": {
+    "@/*": ["src/*"]
+  }
+}

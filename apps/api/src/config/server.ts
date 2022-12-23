@@ -1,14 +1,16 @@
 import urlData from '@fastify/url-data';
-import fastify from 'fastify';
+import fastify, { FastifyInstance } from 'fastify';
 import { getEnvConfig } from '../config/env';
 import displayRoutes from '../routes/displays';
 import roomRoutes from '../routes/rooms';
 import webSockets from '@fastify/websocket';
 
+let server: null | FastifyInstance = null;
 getEnvConfig();
-const server = fastify({ logger: true });
 
 export async function createServer() {
+  if (!server) server = await fastify({ logger: true });
+
   await server.register(urlData);
 
   await server.register(webSockets, {

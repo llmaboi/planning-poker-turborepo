@@ -1,11 +1,11 @@
-# docker compose --env-file ./.env.test  up
+# docker compose --env-file ./.env.docker  up
 version: "1.0"
 
 services:
   mysql:
     container_name: mysql
     env_file:
-      - ./.env.test
+      - ./.env.docker
     restart: always
     ports:
       - ${MYSQL_PORT}:3306
@@ -20,7 +20,7 @@ services:
   api:
     container_name: api
     env_file:
-      - ./.env.test
+      - ./.env.docker
     depends_on:
       - "mysql"
     build:
@@ -38,7 +38,7 @@ services:
   web:
     container_name: web 
     env_file:
-      - ./.env.test
+      - ./.env.docker
     depends_on:
       - "mysql"
       - "api"

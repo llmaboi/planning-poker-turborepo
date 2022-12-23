@@ -7,10 +7,10 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:start": "turbo run dev:start --filter=api  ",
-    "dev:web": "turbo run dev --filter=web  ",
-    "build": "turbo run build",
     "dev": "NODE_ENV=test turbo run dev --parallel",
+    "dev:api": "turbo run dev --filter=api",
+    "dev:web": "turbo run dev --filter=web",
+    "build": "turbo run build",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },

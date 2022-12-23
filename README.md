@@ -1,3 +1,9 @@
+# Startup commands:
+
+- `dev` will start up the repos in a "turbo" fashion where the mysql server will need to be run manually
+- `dev:web` will start only the web project.
+- `dev:api` will start only the api project.
+
 # Turborepo starter
 
 This is an official npm starter turborepo.
